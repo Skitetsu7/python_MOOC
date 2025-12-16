@@ -118,11 +118,14 @@ class SplayTree:
 
 
 import probleme_set
+from probleme_set_2 import SplayTree
 
 
-def test_queue_full_coverage():
+def test():
+    #call the probleme set and SlayTree
     q = probleme_set.Queue(1)
-
+    t= SplayTree()
+    
     assert q.empty()
     q.checkRep()
 
@@ -135,3 +138,35 @@ def test_queue_full_coverage():
     assert q.dequeue() is None
     assert q.empty()
     q.checkRep()
+
+    
+    t = SplayTree()
+
+    # arbre vide
+    t.remove(2331) #
+    assert t.isEmpty()
+    assert t.findMin() is None
+    assert t.findMax() is None
+    assert t.find(157) is None
+
+    # insertions
+    t.insert(20)
+    t.insert(10)
+    t.insert(30)
+
+    # suppressions et insertions mixtes
+    t.remove(3)
+    t.insert(4)
+    t.remove(1)
+    t.insert(4)  # doublon
+    t.insert(0)
+    t.remove(2)
+
+    # last verification
+    assert t.findMin() == -43
+    assert t.findMax() == 49
+    
+    assert t.find(49) == 49
+    assert t.find(5) is None
+
+    t.remove(0)
