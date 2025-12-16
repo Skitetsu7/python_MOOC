@@ -129,7 +129,7 @@ def test():
 
   # Your code here
   # first assertion to be verified
-  q= Queue(1) # verify that the queue can contain more than 0 items
+  q= Queue(20) # verify that the queue can contain more than 0 items
   
   # second assertion to be verified
   assert q.empty() == True  # verify that the queue is empty at the beginning
@@ -137,19 +137,24 @@ def test():
   
   # third assertion to be verified
   for i in range(20):
-      success= q.enqueue(10)
-      if i == 0:
-          assert success == True  # verify that we can queue items until they are full
-      else:
-          assert success == False  # verify that it is impossible to add items to the queue when it is full
+      success= q.enqueue(9999999999) # large value to verify error 1
+      assert success == True  # verify that we can queue items until they are full
 
+  success = q.enqueue(10)
+  assert success == False # verify that it's impossible to add elements when the queue is full
+    
   # fourth assertion to be verified
   assert q.full() == True  # verify that the queue is full
+  assert not q.empty()
   
   # fifth assertion to be verified
-  value= q.dequeue()
-  assert value ==10 # verify that an element can be dequeued when the queue is not empty
+  for i in range(20): 
+      value = q.dequeue() 
+      assert value == 9999999999 #verify that the value 9999999999 not modify
+      assert not q.full()
   assert q.empty() == True  #verify that the queue is empty efter dequeue the only element
+  value= q.dequeue()
+  assert value is None # verify that the queue who are dequeue is empty
   # Calling my test function
 
 
