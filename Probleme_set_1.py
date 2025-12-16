@@ -149,6 +149,9 @@ def test():
   # fifth assertion to be verified
   value= q.dequeue()
   assert value ==10 # verify that an element can be dequeued when the queue is not empty
+  assert q.empty() == True  #verify that the queue is empty efter dequeue the only element
   # Calling my test function
 
+
+  print("all test passed")
 test()
