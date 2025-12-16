@@ -115,3 +115,40 @@ class SplayTree:
         t.left = self.header.right
         t.right = self.header.left
         self.root = t
+
+
+def test():
+    
+    tree = SplayTree()
+    tree.remove(123) #try to remove an element when the tree is empty to 
+    #trigger lines 58-59 the in the remove function
+    assert tree.isEmpty() #check that the tree is empty at the beginning, and at the end, no need to call it 
+    #between as there is only one line to cover
+    assert tree.findMin() is None #Check that the min and the Max don't exist, 
+    #and that we can't find a number when the tree is empty. The three function are nearly the same, 
+    #so we only need to call them when the tree is empty and when there are elements
+    assert tree.findMax() is None
+    assert tree.find(123) is None
+
+    tree.insert(15)
+    tree.insert(7)
+    tree.insert(45)
+    
+    tree.remove(45)#we call the remove method to enter the else condition
+    
+    tree.insert(35)
+    
+    tree.remove(7)
+    
+    tree.insert(35)#we do this to go inside the insert function, as the element already exist
+    tree.insert(-5)
+    
+    assert tree.findMax() == 35 #same as above for min and Max
+    assert tree.findMin() == -5
+    
+    assert tree.find(35) == 35
+    assert tree.find(5) is None
+    
+
+    
+test()
