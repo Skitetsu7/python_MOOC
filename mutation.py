@@ -1,66 +1,72 @@
-# jeu du pendu muté
+# mutant_generator.py
 import random
+import copy
 
-# Pour gérer les lettres avec accents
-accent_letter = {
-    'à': 'a', 'â': 'a', 'ä': 'a',
-    'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
-    'î': 'i', 'ï': 'i',
-    'ô': 'o', 'ö': 'o',
-    'ù': 'u', 'û': 'u', 'ü': 'u',
-    'ç': 'c'
-}
+# Liste de mots pour les mutants
+mots_base = ['pomme', 'banane', 'orange']
 
-# Fonction pour choisir un mot au hasard (mutation: mot fixé au lieu de random)
-def choisir_mot_mutant():
-    mots = ['pomme', 'banane', 'orange']
-    # Mutation: on ne choisit jamais aléatoirement, prend toujours le premier
-    mot = mots[0]  
-    mot = mot.lower()
-    return ''.join(accent_letter.get(char, char) for char in mot)
+# Mutations possibles
+def mutate_vie(vie):
+    """Mutation: change la vie initiale"""
+    return vie + 1  # dépassement volontaire
 
-# Fonction pour demander une lettre (mutation: toujours retourne 'a')
-def demande_lettre_mutant():
+def mutate_mot(mot):
+    """Mutation: toujours le premier mot"""
+    return mots_base[0]
+
+def mutate_win_or_lose(words, letter):
+    """Mutation: retourne toujours 1"""
+    return 1
+
+def mutate_demande_lettre():
+    """Mutation: toujours retourne 'a'"""
     return 'a'
 
-# Affichage vie (reste inchangé)
-def affichage_vie(vie):
-    print(f"Vies restantes (mutant): {vie}")
+# Jeu de base à muter
+def jeu_running(vie=6, choisir_mot_func=None, demande_lettre_func=None, win_or_lose_func=None):
+    if choisir_mot_func is None:
+        choisir_mot_func = lambda: random.choice(mots_base)
+    if demande_lettre_func is None:
+        demande_lettre_func = lambda: input("Entrez une lettre: ")
+    if win_or_lose_func is None:
+        win_or_lose_func = lambda mot, lettre: lettre in mot
 
-# Affichage mot
-def affichage_mot(mot, nblettre):
-    mot_affiche = ['_' if lettre not in nblettre else lettre for lettre in mot]
-    print(' '.join(mot_affiche))
-
-# Mutation: win_or_lose retourne toujours 1 (ne détecte jamais faux)
-def win_or_lose_mutant(words, letter):
-    return 1  # mutant: ignore la vraie vérification
-
-# Jeu principal avec mutants
-def jeu_running_mutant():
-    mot = choisir_mot_mutant()
-    vie = 7  # mutant: vie initiale incorrecte
+    mot = choisir_mot_func()
     lettre_trouvee = []
     lettre_fausse = []
 
     while vie != 0 and len(lettre_trouvee) != len(set(mot)):
-        affichage_mot(mot, lettre_trouvee)
-        lettre = demande_lettre_mutant()
+        print("Mot:", ''.join(l if l in lettre_trouvee else '_' for l in mot))
+        lettre = demande_lettre_func()
 
-        if win_or_lose_mutant(mot, lettre) and lettre not in lettre_trouvee:
+        if win_or_lose_func(mot, lettre) and lettre not in lettre_trouvee:
             lettre_trouvee.append(lettre)
         else:
             if lettre not in lettre_fausse:
                 vie -= 1
                 lettre_fausse.append(lettre)
-
-        affichage_vie(vie)
+        print("Vies:", vie)
 
     if len(lettre_trouvee) == len(set(mot)):
-        print('Victoire (mutant)! Mot:', mot)
+        print("Victoire! Mot:", mot)
     else:
-        print('Défaite (mutant). Mot:', mot)
+        print("Défaite! Mot:", mot)
 
-# Lancer le jeu mutant
-if __name__ == "__main__":
-    jeu_running_mutant()
+# Liste des mutants
+mutants = [
+    {"vie": mutate_vie, "choisir_mot": None, "demande_lettre": None, "win_or_lose": None},
+    {"vie": 6, "choisir_mot": mutate_mot, "demande_lettre": None, "win_or_lose": None},
+    {"vie": 6, "choisir_mot": None, "demande_lettre": mutate_demande_lettre, "win_or_lose": None},
+    {"vie": 6, "choisir_mot": None, "demande_lettre": None, "win_or_lose": mutate_win_or_lose},
+]
+
+# Exécution des mutants
+for i, m in enumerate(mutants):
+    print(f"\n=== Exécution du mutant {i+1} ===")
+    vie = m 
+    jeu_running(
+        vie=vie,
+        choisir_mot_func=m["choisir_mot"],
+        demande_lettre_func=m["demande_lettre"],
+        win_or_lose_func=m["win_or_lose"]
+    )
