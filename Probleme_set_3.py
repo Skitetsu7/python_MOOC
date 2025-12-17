@@ -101,60 +101,62 @@ hard = [[1,0,0,0,0,7,0,9,0],
         [0,0,7,0,0,0,3,0,0]]
 
 def check_sudoku(grid):
-    """Determine whether a given sudoku grid is valid and correct.
-
-    To be valid, a grid must be a 9x9 list of lists made of ints in the range 0..9.
-
-    To be correct, a grid must respect the following rules:
-    * each number in the range 1..9 occurs only once in each row;
-    * each number in the range 1..9 occurs only once in each column;
-    * each number the range 1..9 occurs only once in each of the nine 3x3 sub-grids, or "boxes", that make up the board.
-
-    :param grid: the grid to check
-    :return: None if the grid is invalid, False if it's incorrect and True otherwise
-    """
-    # Check validity
-    if not isinstance(grid, list) or len(grid) != 9:
+    #Verify that the grid is a list of 9 lists, where each sublist contains 9 integers, and each integer is between 0 and 9.
+    if type(grid) is not list or len(grid) != 9:
         return None
-
+    
     for row in grid:
-        if not isinstance(row, list) or len(row) != 9 or \
-                any(number not in range(10) for number in row):
+        if type(row) is not list or len(row) != 9:
             return None
+        for col in row:
+            if type(col) is not int or col < 0 or col > 9:
+                return None
+    
 
-    # Check correctness
-    # We'll use sets to keep track of already used numbers:
-    # if a number is found twice in a given set, the grid is incorrect
-    column_numbers = [set() for i in range(9)]  # make a list of 9 sets
-    subgrid_numbers = [
-        [set(), set(), set()],
-        [set(), set(), set()],
-        [set(), set(), set()]
-    ]
-
-    for row_i, row in enumerate(grid):
-        row_numbers = set()
-
-        for column_i, number in enumerate(row):
-            if number in row_numbers or \
-                    number in column_numbers[column_i] or \
-                    number in subgrid_numbers[row_i // 3][column_i // 3]:
+    def check(cells):
+        #Check that a list does not contain two identical integers between 1 and 9
+        cell =[]
+        for i in cells:
+            if i!=0:
+                cell.append(i)
+                
+        #delete doublon
+        only_cell=set(cell)
+        cell_count=len(cell)
+        only_cell_count=len(only_cell)
+        
+        if cell_count == only_cell_count:
+            return True
+        else:
+            return False        
+    
+    #check each rows:
+    for rows in grid:
+        if not check(rows):
+            return False
+    
+    #check each columns:
+    for i in range(9):
+        cols=[]
+        for j in range(9):
+            cols.append(grid[j][i])
+        if not check(cols):
+            return False
+    
+    #check each 3x3 subsquare
+    for i in range(0, 9, 3): #the value of i is (0,3,6)
+        for j in range(0, 9, 3): #the value of j is (0,3,6)
+            tab = []
+            for k in range(3):
+                for l in range(3):
+                    tab.append(grid[i+k][j+l])
+            if not check(tab):
                 return False
-
-            if number != 0:
-                # Add the number to corresponding sets
-                row_numbers.add(number)
-                column_numbers[column_i].add(number)
-                subgrid_numbers[row_i // 3][column_i // 3].add(number)
-
-    # Everything went fine
+    #the grid is valid
     return True
 
-def main():
-    for name, grid in grids.items():
-        print(name, '->', check_sudoku(grid))
-
-
-if __name__ == '__main__':
-    main()
-
+print(check_sudoku(ill_formed)) # --> None
+print(check_sudoku(valid))      # --> True
+print(check_sudoku(invalid))  # --> False
+print(check_sudoku(easy))      # --> True
+print(check_sudoku(hard))     # --> True
