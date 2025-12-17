@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import os
 from math import ceil
 from time import sleep, strftime
@@ -27,26 +24,23 @@ def fuzz(content, factor, ascii_bytes=False):
     return bytes(buffer)
 
 
-def clear_screen():
-    """Clear the console screen in a portable way."""
-    os.system('clear' if os.name == 'posix' else 'cls')
-
-
 def main():
     # Config
-    input_dir = 'input/dpsm/'
-    output_dir = 'crashes/'
-    fuzz_output = 'testfile'
+    directory_de_base = os.path.dirname(os.path.abspath(__file__))
+    input_dir = os.path.join(directory_de_base, "input")          
+    output_dir = os.path.join(directory_de_base, "crashes")        
+    fuzz_output = os.path.join(directory_de_base, "testfile.txt") 
+    libreoffice_path = r"C:\Program Files\LibreOffice\program\soffice.exe"  # adress modifier
+
     apps = [
-        ['./dpsm.py', '--verbose', fuzz_output, '/dev/null'],  # cf. presentation.pdf
-        # ['ristretto', fuzz_output],
-        # ['vlc', fuzz_output],
-        # ['atril', fuzz_output],
-        # ['libreoffice', fuzz_output]
+        [libreoffice_path, fuzz_output],
+        #[r"%HOMEDRIVE%%HOMEPATH%%windir%\system32\notepad.exe", fuzz_output],
     ]
-    n_tests = 10000
-    timeout = 0
-    fuzz_factor = 0.001
+    n_tests = 10 000 #n_tests est tester pour à chaque itération le test aléatoire
+    # chaque itération consiste à choisir un fichier au hazard, le 'fuzzer' en modifiant des octets, lancer l'app sur le fichier er cerifier les crash
+    # crash assez rare du coup faut dépasser les 100, plus le n_tests est grand plus la confiance augmente envers le code pour résister au crash potentiel 
+    timeout = 2 #delai pour laisser au programme le temps de reagir
+    fuzz_factor = 0.01 #1% du fichier sert de correction du facteur (au lieu des 250 de base)
     ascii_bytes = True
 
     # Setup
@@ -68,8 +62,8 @@ def main():
         with open(fuzz_output, 'wb') as file:
             file.write(fuzz(content, fuzz_factor, ascii_bytes=ascii_bytes))
 
+        
         # Open it with the chosen app
-        clear_screen()
         print(f'Test {i + 1} of {n_tests} (crashes: {n_crashes})\n'
               f'app={app}\n'
               f'file_name={file_name}\n'
@@ -78,30 +72,39 @@ def main():
               f'ascii_bytes={ascii_bytes}\n')
 
         if timeout:
-            process = Popen(app, encoding="utf-8", stdout=PIPE, stderr=STDOUT)
+            process = Popen(app, encoding="utf-8", stdout=PIPE, stderr=STDOUT, shell= True) #shell= True parce que windows a un problème avec les espaces et il y a un espaces dans mon fichier
             sleep(timeout)
             crashed = process.poll()
-            if not crashed:
+            if crashed is None:
                 process.terminate()
-
+            elif crashed !=0: #crash si le code est différent de 0
+                n_crashes+=1
+                crash_name =os.path.join(output_dir, f'{strftime("%Y-%m-%d.%H-%M-%S")}.{i}.{file_name}')
+                os.rename(fuzz_output, crash_name)
+                with open(crash_name+ '.log', 'w') as file:
+                    file.write(process.stdout)
         else:
             process = run(app, encoding="utf-8", stdout=PIPE, stderr=STDOUT)
-            crashed = process.returncode
+            crashed = process.returncode  # return the error of the app if it crashed
 
-        # If it crashed, save the test case and its output
-        if crashed:
-            n_crashes += 1
-            crash_name = os.path.join(output_dir, f'{strftime("%Y-%m-%d.%H-%M-%S")}.{i}.{file_name}')
-            
-            os.rename(fuzz_output, crash_name)
-            with open(crash_name + '.log', 'w') as file:
-                file.write(process.stdout)
+            # If it crashed, save the test case and its output
+            if crashed !=0:
+                n_crashes += 1
+                crash_name = os.path.join(
+                    output_dir, f'{strftime("%Y-%m-%d.%H-%M-%S")}.{i}.{file_name}')  # Create a name for the crash file for the archives
+
+                os.rename(fuzz_output, crash_name)
+                with open(crash_name + '.log', 'w') as file:  # Create a log file
+                    # Write the output of the app in the log file
+                    file.write(process.stdout)
 
     # Done
-    os.remove(fuzz_output)  # clean up
+    if os.path.exists(fuzz_output): #eviter l'erreur si le fichier a été renommer
+        os.remove(fuzz_output) #neccessaire pour pas saturé le disque dur
     print('Done\n'
+          # print the number of successes
           f'Successes: {n_tests - n_crashes}\n'
-          f'Crashes: {n_crashes} ({ceil(n_crashes/n_tests * 10000) / 100}%)')
+          f'Crashes: {n_crashes} ({ceil(n_crashes/n_tests * 10000) / 100}%)')  # Print the number of crashes and the percentage of crashes
 
 
 if __name__ == '__main__':
