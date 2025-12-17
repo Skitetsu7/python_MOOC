@@ -122,51 +122,42 @@ from probleme_set_2 import SplayTree
 
 
 def test():
-    #call the probleme set and SlayTree
-    q = probleme_set.Queue(1)
-    t= SplayTree()
+    #Your code here
+    st = SplayTree() #cover _init_
     
-    assert q.empty()
-    q.checkRep()
+    #fisrt step: empty tree
+    assert st.findMin() is None #cover "if root == None" in findMin
+    assert st.findMax() is None #cover "if root == None" in findMax
+    assert st.find(157) is None #cover "if root == None" in find
+    st.remove(20) #cover "if root is None" in remove
 
-    assert q.enqueue(10)
-    assert not q.enqueue(20)
-    assert q.full()
-    q.checkRep()
+    #second step: insertions
+    st.insert(20)  #cover "if root == None" in insert
+    st.insert(20) #cover "if root.key == key" (doublon par rapport à celui au dessus)
+    st.insert(25) #pass by "else key>root.key"
 
-    assert q.dequeue() == 10
-    assert q.dequeue() is None
-    assert q.empty()
-    q.checkRep()
+    #third step: forced splay
+    st.splay(28)
+    st.insert(15) #pass by "if key<roor.key"
 
+    #fourth step: verify min/max
+    assert st.findMin() == 15
+    assert st.findMax() == 25
     
-    t = SplayTree()
+    #fifth step: verify find
+    assert st.find(15) == 15 #cover "return root.key"
+    assert st.find(5) is None #cover "if root.key != key"
 
-    # arbre vide
-    t.remove(2331) #
-    assert t.isEmpty()
-    assert t.findMin() is None
-    assert t.findMax() is None
-    assert t.find(157) is None
-
-    # insertions
-    t.insert(20)
-    t.insert(10)
-    t.insert(30)
-
-    # suppressions et insertions mixtes
-    t.remove(3)
-    t.insert(4)
-    t.remove(1)
-    t.insert(4)  # doublon
-    t.insert(0)
-    t.remove(2)
-
-    # last verification
-    assert t.findMin() == -43
-    assert t.findMax() == 49
+    #sixth step: verify remove
+    st.remove(20) #cover "else"
+    st.remove(15) #cover "if root.left ==None"
+    assert st.isEmpty() is False #cover isEmpty
     
-    assert t.find(49) == 49
-    assert t.find(5) is None
-
-    t.remove(0)
+    #seventh step: called multiple times splay()
+    st.insert(24)
+    st.insert(23)
+    st.insert(46)
+    st.insert(18)
+    st.insert(2)
+    st.insert(76)
+    st.insert(7)
