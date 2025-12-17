@@ -68,21 +68,33 @@ class Queue:
 # Add test code to test() that achieves 100% coverage of the 
 # Queue class.
 def test():
-    q = Queue(1)
-    assert q.empty()
-    q.checkRep()
+    ### Your code here
+    x = Queue(2) #create a queue, coverage init function
+    assert x.empty() #coverage on the empty function
+    full = x.full()
+    assert not full #coverage on the full function
+    dequeue = x.dequeue() #for the coverage of the first return I need to dequeue an empty queue with the dequeue function
+    assert dequeue is None
+    x.checkRep() #check coverage of the firsts assert
     
-    success = q.enqueue(10)
+    success = x.enqueue(17) #coverage on the enqueue function, except "if self.tail == self.max:" in the function
     assert success
-    success = q.enqueue(10)
-    assert not success
-    assert q.full()
-    q.checkRep()
+    x.checkRep() #check coverage of the 4 firsts assert
     
-    value = q.dequeue()
-    assert value == 10
-    value = q.dequeue()
-    assert value is None
-    assert q.empty()
-    q.checkRep()
+    success = x.enqueue(24) # application of the coverage on this condition : "if self.tail == self.max:"
+    assert success
+    success = x.enqueue(5) #check the enqueue function when the queue is full, coverage the first return of the function
+    assert not success
+    dequeue = x.dequeue() #coverage on the dequeue function, except "if self.tail == self.max:" in the function
+    assert dequeue == 17
+    x.checkRep()
+    
+    dequeue = x.dequeue() # application of the coverage on this condition : "if self.tail == self.max:"
+    assert dequeue == 24
+    
+    dequeue = x.dequeue() #verify the condition when we want dequeue an empty queue
+    assert dequeue is None
+    empty = x.empty() #verify that the queue is empty after remove the elements
+    assert empty
+    x.checkRep() #last check, head and tail include in the queue
 test()
