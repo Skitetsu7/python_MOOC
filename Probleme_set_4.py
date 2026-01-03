@@ -30,13 +30,14 @@ def main():
     input_dir = os.path.join(directory_de_base, "input")          
     output_dir = os.path.join(directory_de_base, "crashes")        
     fuzz_output = os.path.join(directory_de_base, "testfile.txt") 
+    # après 10 000 iterations de fuzzing aléatoire, aucun crash n'a été rencontré. Même an renommant les fichier avec de nouvelles extesnions (.docx, .pdf, etc), montrant qu'elle gère les entrées invalide
     libreoffice_path = r"C:\Program Files\LibreOffice\program\soffice.exe"  # adress modifier
 
     apps = [
         [libreoffice_path, fuzz_output],
         #[r"%HOMEDRIVE%%HOMEPATH%%windir%\system32\notepad.exe", fuzz_output],
     ]
-    n_tests = 10 000 #n_tests est tester pour à chaque itération le test aléatoire
+    n_tests = 10000 #n_tests est tester pour à chaque itération le test aléatoire
     # chaque itération consiste à choisir un fichier au hazard, le 'fuzzer' en modifiant des octets, lancer l'app sur le fichier er cerifier les crash
     # crash assez rare du coup faut dépasser les 100, plus le n_tests est grand plus la confiance augmente envers le code pour résister au crash potentiel 
     timeout = 2 #delai pour laisser au programme le temps de reagir
