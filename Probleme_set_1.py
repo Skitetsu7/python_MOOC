@@ -128,6 +128,7 @@ def test():
      print("The error 5 is triggered")
 
   # Your code here
+  # running multiple time to detect all faulty queues, because triggers are random
   # first assertion to be verified
   q= Queue(20) # verify that the queue can contain more than 0 items
   
